@@ -9,8 +9,9 @@
   status = 200
 
 [functions]
-  # node_version is now properly configured as an object
-  node_version = "20"
+
+  [functions.node_version]
+  version = 20
 
 [dev]
   command = "pnpm dev"
