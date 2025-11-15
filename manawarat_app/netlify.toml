@@ -1,11 +1,16 @@
 [build]
   command = "pnpm build"
   publish = "dist/public"
-  functions = "dist"
+  functions = "dist/netlify/functions"
 
 [[redirects]]
   from = "/api/*"
-  to = "/.netlify/functions/index"
+  to = "/.netlify/functions/server"
+  status = 200
+
+[[redirects]]
+  from = "/trpc/*"
+  to = "/.netlify/functions/server"
   status = 200
 
 [[redirects]]
