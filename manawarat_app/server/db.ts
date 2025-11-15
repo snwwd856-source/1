@@ -8,11 +8,28 @@ import {
   transactions,
 } from "../drizzle/schema";
 import { ENV } from './_core/env';
+import { 
+  getDb as getSupabaseDb,
+  getUserByUsername as getSupabaseUserByUsername,
+  getUserByEmail as getSupabaseUserByEmail,
+  getUserById as getSupabaseUserById,
+  createUser as createSupabaseUser,
+  updateUser as updateSupabaseUser,
+  getUserByReferralCode as getSupabaseUserByReferralCode,
+  getAllPendingUsers as getSupabaseAllPendingUsers,
+  getAllUsers as getSupabaseAllUsers,
+  approveTaskAssignment as supabaseApproveTaskAssignment
+} from './supabaseDb';
 
 let _db: ReturnType<typeof drizzle> | null = null;
 
 // Lazily create the drizzle instance so local tooling can run without a DB.
 export async function getDb() {
+  // Use Supabase if SUPABASE_URL is set, otherwise use MySQL
+  if (ENV.supabaseUrl && ENV.supabaseUrl !== "") {
+    return await getSupabaseDb();
+  }
+  
   if (!_db && process.env.DATABASE_URL) {
     try {
       _db = drizzle(process.env.DATABASE_URL);
@@ -25,6 +42,11 @@ export async function getDb() {
 }
 
 export async function getUserByUsername(username: string) {
+  // Use Supabase if SUPABASE_URL is set, otherwise use MySQL
+  if (ENV.supabaseUrl && ENV.supabaseUrl !== "") {
+    return await getSupabaseUserByUsername(username);
+  }
+  
   const db = await getDb();
   if (!db) {
     console.warn("[Database] Cannot get user: database not available");
@@ -36,6 +58,11 @@ export async function getUserByUsername(username: string) {
 }
 
 export async function getUserByEmail(email: string) {
+  // Use Supabase if SUPABASE_URL is set, otherwise use MySQL
+  if (ENV.supabaseUrl && ENV.supabaseUrl !== "") {
+    return await getSupabaseUserByEmail(email);
+  }
+  
   const db = await getDb();
   if (!db) {
     console.warn("[Database] Cannot get user: database not available");
@@ -47,6 +74,11 @@ export async function getUserByEmail(email: string) {
 }
 
 export async function getUserById(id: number) {
+  // Use Supabase if SUPABASE_URL is set, otherwise use MySQL
+  if (ENV.supabaseUrl && ENV.supabaseUrl !== "") {
+    return await getSupabaseUserById(id);
+  }
+  
   const db = await getDb();
   if (!db) {
     console.warn("[Database] Cannot get user: database not available");
@@ -58,6 +90,11 @@ export async function getUserById(id: number) {
 }
 
 export async function createUser(user: InsertUser): Promise<void> {
+  // Use Supabase if SUPABASE_URL is set, otherwise use MySQL
+  if (ENV.supabaseUrl && ENV.supabaseUrl !== "") {
+    return await createSupabaseUser(user);
+  }
+  
   if (!user.username || !user.email) {
     throw new Error("Username and email are required for user creation");
   }
@@ -77,6 +114,11 @@ export async function createUser(user: InsertUser): Promise<void> {
 }
 
 export async function updateUser(id: number, updates: Partial<InsertUser>): Promise<void> {
+  // Use Supabase if SUPABASE_URL is set, otherwise use MySQL
+  if (ENV.supabaseUrl && ENV.supabaseUrl !== "") {
+    return await updateSupabaseUser(id, updates);
+  }
+  
   const db = await getDb();
   if (!db) {
     console.warn("[Database] Cannot update user: database not available");
@@ -92,6 +134,11 @@ export async function updateUser(id: number, updates: Partial<InsertUser>): Prom
 }
 
 export async function getUserByReferralCode(referralCode: string) {
+  // Use Supabase if SUPABASE_URL is set, otherwise use MySQL
+  if (ENV.supabaseUrl && ENV.supabaseUrl !== "") {
+    return await getSupabaseUserByReferralCode(referralCode);
+  }
+  
   const db = await getDb();
   if (!db) {
     console.warn("[Database] Cannot get user: database not available");
@@ -103,6 +150,11 @@ export async function getUserByReferralCode(referralCode: string) {
 }
 
 export async function getAllPendingUsers() {
+  // Use Supabase if SUPABASE_URL is set, otherwise use MySQL
+  if (ENV.supabaseUrl && ENV.supabaseUrl !== "") {
+    return await getSupabaseAllPendingUsers();
+  }
+  
   const db = await getDb();
   if (!db) {
     console.warn("[Database] Cannot get users: database not available");
@@ -113,6 +165,11 @@ export async function getAllPendingUsers() {
 }
 
 export async function getAllUsers() {
+  // Use Supabase if SUPABASE_URL is set, otherwise use MySQL
+  if (ENV.supabaseUrl && ENV.supabaseUrl !== "") {
+    return await getSupabaseAllUsers();
+  }
+  
   const db = await getDb();
   if (!db) {
     console.warn("[Database] Cannot get users: database not available");
@@ -130,6 +187,11 @@ export async function getAllUsers() {
  * All amounts are stored in cents (integer)
  */
 export async function approveTaskAssignment(assignmentId: number, adminId: number) {
+  // Use Supabase if SUPABASE_URL is set, otherwise use MySQL
+  if (ENV.supabaseUrl && ENV.supabaseUrl !== "") {
+    return await supabaseApproveTaskAssignment(assignmentId, adminId);
+  }
+  
   const db = await getDb();
   if (!db) {
     throw new Error("Database not available");
@@ -184,5 +246,3 @@ export async function approveTaskAssignment(assignmentId: number, adminId: numbe
 
   return { success: true };
 }
-
-// TODO: add feature queries here as your schema grows.
